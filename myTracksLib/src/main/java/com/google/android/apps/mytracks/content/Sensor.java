@@ -54,7 +54,7 @@ public final class Sensor {
   }
   
   public static final class SensorData extends
-      com.google.protobuf.GeneratedMessageLite {
+      com.google.protobuf.GeneratedMessageLite<SensorData, SensorData.Builder> {
     // Use SensorData.newBuilder() to construct.
     private SensorData() {
       initFields();
@@ -66,9 +66,9 @@ public final class Sensor {
       return defaultInstance;
     }
     
-    public SensorData getDefaultInstanceForType() {
-      return defaultInstance;
-    }
+//    public SensorData getDefaultInstanceForType() {
+//      return defaultInstance;
+//    }
     
     // required .com.google.android.apps.mytracks.content.SensorState state = 1 [default = NONE];
     public static final int STATE_FIELD_NUMBER = 1;
@@ -87,10 +87,10 @@ public final class Sensor {
     private void initFields() {
       state_ = com.google.android.apps.mytracks.content.Sensor.SensorState.NONE;
     }
-    public final boolean isInitialized() {
-      if (!hasState) return false;
-      return true;
-    }
+//    public final boolean isInitialized() {
+//      if (!hasState) return false;
+//      return true;
+//    }
     
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
@@ -189,22 +189,32 @@ public final class Sensor {
     }
     
     public static Builder newBuilder() { return Builder.create(); }
-    public Builder newBuilderForType() { return newBuilder(); }
+//    public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.google.android.apps.mytracks.content.Sensor.SensorData prototype) {
       return newBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() { return newBuilder(this); }
-    
+//    public Builder toBuilder() { return newBuilder(this); }
+
+    @Override
+    protected Object dynamicMethod(MethodToInvoke method, Object arg0, Object arg1) {
+      // TODO: Added for latest Build of protobuf
+      return null;
+    }
+
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageLite.Builder<
           com.google.android.apps.mytracks.content.Sensor.SensorData, Builder> {
       private com.google.android.apps.mytracks.content.Sensor.SensorData result;
-      
+
+      protected Builder(SensorData defaultInstance) {
+        super(defaultInstance);
+      }
+
       // Construct using com.google.android.apps.mytracks.content.Sensor.SensorData.newBuilder()
-      private Builder() {}
+//      private Builder() {}
       
       private static Builder create() {
-        Builder builder = new Builder();
+        Builder builder = new Builder(new SensorData());
         builder.result = new com.google.android.apps.mytracks.content.Sensor.SensorData();
         return builder;
       }
@@ -213,14 +223,14 @@ public final class Sensor {
         return result;
       }
       
-      public Builder clear() {
-        if (result == null) {
-          throw new IllegalStateException(
-            "Cannot call clear() after build().");
-        }
-        result = new com.google.android.apps.mytracks.content.Sensor.SensorData();
-        return this;
-      }
+//      public Builder clear() {
+//        if (result == null) {
+//          throw new IllegalStateException(
+//            "Cannot call clear() after build().");
+//        }
+//        result = new com.google.android.apps.mytracks.content.Sensor.SensorData();
+//        return this;
+//      }
       
       public Builder clone() {
         return create().mergeFrom(result);
@@ -230,15 +240,15 @@ public final class Sensor {
         return com.google.android.apps.mytracks.content.Sensor.SensorData.getDefaultInstance();
       }
       
-      public boolean isInitialized() {
-        return result.isInitialized();
-      }
-      public com.google.android.apps.mytracks.content.Sensor.SensorData build() {
-        if (result != null && !isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return buildPartial();
-      }
+//      public boolean isInitialized() {
+//        return result.isInitialized();
+//      }
+//      public com.google.android.apps.mytracks.content.Sensor.SensorData build() {
+//        if (result != null && !isInitialized()) {
+//          throw newUninitializedMessageException(result);
+//        }
+//        return buildPartial();
+//      }
       
       private com.google.android.apps.mytracks.content.Sensor.SensorData buildParsed()
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -280,7 +290,7 @@ public final class Sensor {
             case 0:
               return this;
             default: {
-              if (!parseUnknownField(input, extensionRegistry, tag)) {
+              if (!getDefaultInstance().parseUnknownField(tag, input)) {
                 return this;
               }
               break;
@@ -354,7 +364,7 @@ public final class Sensor {
   }
   
   public static final class SensorDataSet extends
-      com.google.protobuf.GeneratedMessageLite {
+      com.google.protobuf.GeneratedMessageLite<SensorDataSet, SensorDataSet.Builder> {
     // Use SensorDataSet.newBuilder() to construct.
     private SensorDataSet() {
       initFields();
@@ -366,9 +376,9 @@ public final class Sensor {
       return defaultInstance;
     }
     
-    public SensorDataSet getDefaultInstanceForType() {
-      return defaultInstance;
-    }
+//    public SensorDataSet getDefaultInstanceForType() {
+//      return defaultInstance;
+//    }
     
     // optional uint64 creation_time = 1 [default = 0];
     public static final int CREATION_TIME_FIELD_NUMBER = 1;
@@ -411,21 +421,21 @@ public final class Sensor {
       power_ = com.google.android.apps.mytracks.content.Sensor.SensorData.getDefaultInstance();
       batteryLevel_ = com.google.android.apps.mytracks.content.Sensor.SensorData.getDefaultInstance();
     }
-    public final boolean isInitialized() {
-      if (hasHeartRate()) {
-        if (!getHeartRate().isInitialized()) return false;
-      }
-      if (hasCadence()) {
-        if (!getCadence().isInitialized()) return false;
-      }
-      if (hasPower()) {
-        if (!getPower().isInitialized()) return false;
-      }
-      if (hasBatteryLevel()) {
-        if (!getBatteryLevel().isInitialized()) return false;
-      }
-      return true;
-    }
+//    public final boolean isInitialized() {
+//      if (hasHeartRate()) {
+//        if (!getHeartRate().isInitialized()) return false;
+//      }
+//      if (hasCadence()) {
+//        if (!getCadence().isInitialized()) return false;
+//      }
+//      if (hasPower()) {
+//        if (!getPower().isInitialized()) return false;
+//      }
+//      if (hasBatteryLevel()) {
+//        if (!getBatteryLevel().isInitialized()) return false;
+//      }
+//      return true;
+//    }
     
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
@@ -545,38 +555,48 @@ public final class Sensor {
     }
     
     public static Builder newBuilder() { return Builder.create(); }
-    public Builder newBuilderForType() { return newBuilder(); }
+//    public Builder newBuilderForType() { return newBuilder(); }
     public static Builder newBuilder(com.google.android.apps.mytracks.content.Sensor.SensorDataSet prototype) {
       return newBuilder().mergeFrom(prototype);
     }
-    public Builder toBuilder() { return newBuilder(this); }
-    
+//    public Builder toBuilder() { return newBuilder(this); }
+
+    @Override
+    protected Object dynamicMethod(MethodToInvoke method, Object arg0, Object arg1) {
+      // TODO:
+      return null;
+    }
+
     public static final class Builder extends
         com.google.protobuf.GeneratedMessageLite.Builder<
           com.google.android.apps.mytracks.content.Sensor.SensorDataSet, Builder> {
       private com.google.android.apps.mytracks.content.Sensor.SensorDataSet result;
-      
+
+      protected Builder(SensorDataSet defaultInstance) {
+        super(defaultInstance);
+      }
+
       // Construct using com.google.android.apps.mytracks.content.Sensor.SensorDataSet.newBuilder()
-      private Builder() {}
+//      private Builder() {}
       
       private static Builder create() {
-        Builder builder = new Builder();
+        Builder builder = new Builder(new com.google.android.apps.mytracks.content.Sensor.SensorDataSet());
         builder.result = new com.google.android.apps.mytracks.content.Sensor.SensorDataSet();
         return builder;
       }
       
-      protected com.google.android.apps.mytracks.content.Sensor.SensorDataSet internalGetResult() {
-        return result;
-      }
+//      protected com.google.android.apps.mytracks.content.Sensor.SensorDataSet internalGetResult() {
+//        return result;
+//      }
       
-      public Builder clear() {
-        if (result == null) {
-          throw new IllegalStateException(
-            "Cannot call clear() after build().");
-        }
-        result = new com.google.android.apps.mytracks.content.Sensor.SensorDataSet();
-        return this;
-      }
+//      public Builder clear() {
+//        if (result == null) {
+//          throw new IllegalStateException(
+//            "Cannot call clear() after build().");
+//        }
+//        result = new com.google.android.apps.mytracks.content.Sensor.SensorDataSet();
+//        return this;
+//      }
       
       public Builder clone() {
         return create().mergeFrom(result);
@@ -586,15 +606,15 @@ public final class Sensor {
         return com.google.android.apps.mytracks.content.Sensor.SensorDataSet.getDefaultInstance();
       }
       
-      public boolean isInitialized() {
-        return result.isInitialized();
-      }
-      public com.google.android.apps.mytracks.content.Sensor.SensorDataSet build() {
-        if (result != null && !isInitialized()) {
-          throw newUninitializedMessageException(result);
-        }
-        return buildPartial();
-      }
+//      public boolean isInitialized() {
+//        return result.isInitialized();
+//      }
+//      public com.google.android.apps.mytracks.content.Sensor.SensorDataSet build() {
+//        if (result != null && !isInitialized()) {
+//          throw newUninitializedMessageException(result);
+//        }
+//        return buildPartial();
+//      }
       
       private com.google.android.apps.mytracks.content.Sensor.SensorDataSet buildParsed()
           throws com.google.protobuf.InvalidProtocolBufferException {
@@ -645,7 +665,7 @@ public final class Sensor {
             case 0:
               return this;
             default: {
-              if (!parseUnknownField(input, extensionRegistry, tag)) {
+              if (!getDefaultInstance().parseUnknownField(tag, input)) {
                 return this;
               }
               break;

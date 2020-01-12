@@ -1,13 +1,15 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 17
-    buildToolsVersion "23.0.2"
+    compileSdkVersion 29
+    useLibrary  'org.apache.http.legacy'
 
     defaultConfig {
         applicationId "com.google.android.maps.mytracks"
-        minSdkVersion 9
-        targetSdkVersion 19
+        minSdkVersion 16
+        targetSdkVersion 29
+
+        multiDexEnabled true
 
         testApplicationId "com.google.android.maps.mytracks.test"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
@@ -19,35 +21,55 @@ android {
             proguardFiles 'proguard.cfg', 'proguard-google-api-client.txt'
         }
     }
+
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/ASL2.0'
+    }
 }
 
 dependencies {
-    compile project(':myTracksLib')
-    compile files('libs/android-support-v4.jar')
-    compile files('libs/antlib.jar')
-    compile files('libs/gdata-client-1.0.jar')
-    compile files('libs/gdata-client-meta-1.0.jar')
-    compile files('libs/gdata-core-1.0.jar')
-    compile files('libs/gdata-spreadsheet-3.0.jar')
-    compile files('libs/gdata-spreadsheet-meta-3.0.jar')
-    compile files('libs/google-api-client-1.12.0-beta.jar')
-    compile files('libs/google-api-client-android-1.12.0-beta.jar')
-    compile files('libs/google-api-services-drive-v2-rev30-1.12.0-beta.jar')
-    compile files('libs/google-api-services-fusiontables-v1-rev16-1.12.0-beta.jar')
-    compile files('libs/google-common.jar')
-    compile files('libs/google-http-client-1.12.0-beta.jar')
-    compile files('libs/google-http-client-android-1.12.0-beta.jar')
-    compile files('libs/google-http-client-gson-1.12.0-beta.jar')
-    compile files('libs/google-http-client-jackson-1.12.0-beta.jar')
-    compile files('libs/google-http-client-jackson2-1.12.0-beta.jar')
-    compile files('libs/google-oauth-client-1.12.0-beta.jar')
-	compile files('libs/google-play-services.jar')
-    compile files('libs/gson-2.1.jar')
-    compile files('libs/guava-jdk5-13.0.jar')
-    compile files('libs/jackson-core-2.0.5.jar')
-    compile files('libs/jackson-core-asl-1.9.9.jar')
-    compile files('libs/jsr305.jar')
-    compile files('libs/libGoogleAnalytics.jar')
-    androidTestCompile files('libs/AndroidMockGenerator.jar')
-    androidTestCompile files('libs/robotium-solo-5.0.1.jar')
+    implementation project(':myTracksLib')
+
+    implementation files('libs/antlib.jar')
+    implementation files('libs/google-common.jar')
+
+    implementation 'com.google.gdata:core:1.47.1'
+    implementation 'com.google.api-client:google-api-client:1.30.7'
+    implementation 'com.google.api-client:google-api-client-android:1.30.7'
+    implementation 'com.google.apis:google-api-services-drive:v2-rev362-1.25.0'
+    implementation 'com.google.apis:google-api-services-fusiontables:v1-rev88-1.25.0'
+    implementation 'com.google.http-client:google-http-client:1.34.0'
+    implementation 'com.google.http-client:google-http-client-android:1.34.0'
+    implementation 'com.google.http-client:google-http-client-gson:1.34.0'
+    implementation 'com.google.http-client:google-http-client-jackson:1.29.2'
+    implementation 'com.google.http-client:google-http-client-jackson2:1.34.0'
+    implementation 'com.google.oauth-client:google-oauth-client:1.30.5'
+    implementation 'com.google.android.gms:play-services-maps:17.0.0'
+    implementation 'com.google.android.gms:play-services-location:17.0.0'
+    implementation 'com.google.android.gms:play-services-auth:17.0.0'
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
+    implementation 'com.google.guava:guava:28.1-android'
+    implementation 'com.google.protobuf:protobuf-lite:3.0.1'
+
+    implementation 'androidx.multidex:multidex:2.0.1'
+    implementation 'androidx.appcompat:appcompat:1.2.0-alpha01'
+
+    androidTestImplementation files('libs/AndroidMockGenerator.jar')
+    androidTestImplementation files('libs/robotium-solo-5.0.1.jar')
+    // Core library
+    androidTestImplementation 'androidx.test:core:1.2.0'
+
+    // AndroidJUnitRunner and JUnit Rules
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test:rules:1.2.0'
+
+    // Assertions
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
 }

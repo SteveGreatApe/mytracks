@@ -34,7 +34,9 @@ import com.google.android.apps.mytracks.util.IntentUtils;
 import com.google.android.apps.mytracks.util.LocationUtils;
 import com.google.android.apps.mytracks.util.PreferencesUtils;
 import com.google.android.apps.mytracks.util.TrackIconUtils;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -42,6 +44,7 @@ import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener;
 import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.LocationSource.OnLocationChangedListener;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -50,6 +53,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.maps.mytracks.R;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -75,7 +79,7 @@ import java.util.EnumSet;
 
 /**
  * A fragment to display map to the user.
- * 
+ *
  * @author Leif Hendrik Wilden
  * @author Rodrigo Damazio
  */
@@ -117,7 +121,7 @@ public class MyTracksMapFragment extends SupportMapFragment implements TrackData
   private MyTracksLocationManager myTracksLocationManager;
 
   // LocationListener for periodic location request
-  private LocationListener locationListener;
+  private LocationCallback locationListener;
 
   private OnLocationChangedListener onLocationChangedListener;
 
@@ -183,9 +187,10 @@ public class MyTracksMapFragment extends SupportMapFragment implements TrackData
               }
             });
           } else {
-            locationListener = new LocationListener() {
+            locationListener = new LocationCallback() {
                 @Override
-              public void onLocationChanged(Location location) {
+                public void onLocationResult(LocationResult result) {
+                  final Location location = result.getLastLocation();
                 if (isResumed()) {
                   boolean isFirst = setCurrentLocation(location);
                   updateCurrentLocation(isFirst);
@@ -207,6 +212,7 @@ public class MyTracksMapFragment extends SupportMapFragment implements TrackData
     return layout;
   }
 
+  @SuppressLint("MissingPermission")
   @Override
   public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
@@ -231,58 +237,63 @@ public class MyTracksMapFragment extends SupportMapFragment implements TrackData
      * it is null.
      */
     if (googleMap == null) {
-      googleMap = getMap();
-      googleMap.setMyLocationEnabled(true);
+      getMapAsync(new OnMapReadyCallback() {
+        @Override
+        public void onMapReady(GoogleMap map) {
+          googleMap = map;
+          googleMap.setMyLocationEnabled(true);
+          /*
+           * My Tracks needs to handle the onClick event when the my location button
+           * is clicked. Currently, the API doesn't allow handling onClick event,
+           * thus hiding the default my location button and providing our own.
+           */
+          googleMap.getUiSettings().setMyLocationButtonEnabled(false);
+          googleMap.setIndoorEnabled(true);
+          googleMap.setOnMarkerClickListener(new OnMarkerClickListener() {
 
-      /*
-       * My Tracks needs to handle the onClick event when the my location button
-       * is clicked. Currently, the API doesn't allow handling onClick event,
-       * thus hiding the default my location button and providing our own.
-       */
-      googleMap.getUiSettings().setMyLocationButtonEnabled(false);
-      googleMap.setIndoorEnabled(true);
-      googleMap.setOnMarkerClickListener(new OnMarkerClickListener() {
-
-          @Override
-        public boolean onMarkerClick(Marker marker) {
-          if (isResumed()) {
-            String title = marker.getTitle();
-            if (title != null && title.length() > 0) {
-              long id = Long.valueOf(title);
-              Context context = getActivity();
-              Intent intent = IntentUtils.newIntent(context, MarkerDetailActivity.class)
-                  .putExtra(MarkerDetailActivity.EXTRA_MARKER_ID, id);
-              context.startActivity(intent);
+              @Override
+            public boolean onMarkerClick(Marker marker) {
+              if (isResumed()) {
+                String title = marker.getTitle();
+                if (title != null && title.length() > 0) {
+                  long id = Long.valueOf(title);
+                  Context context = getActivity();
+                  Intent intent = IntentUtils.newIntent(context, MarkerDetailActivity.class)
+                      .putExtra(MarkerDetailActivity.EXTRA_MARKER_ID, id);
+                  context.startActivity(intent);
+                }
+              }
+              return true;
             }
-          }
-          return true;
-        }
-      });
-      googleMap.setLocationSource(new LocationSource() {
+          });
+          googleMap.setLocationSource(new LocationSource() {
 
-          @Override
-        public void activate(OnLocationChangedListener listener) {
-          onLocationChangedListener = listener;
-        }
+              @Override
+            public void activate(OnLocationChangedListener listener) {
+              onLocationChangedListener = listener;
+            }
 
-          @Override
-        public void deactivate() {
-          onLocationChangedListener = null;
-        }
-      });
-      googleMap.setOnCameraChangeListener(new OnCameraChangeListener() {
+              @Override
+            public void deactivate() {
+              onLocationChangedListener = null;
+            }
+          });
+          googleMap.setOnCameraChangeListener(new OnCameraChangeListener() {
 
-          @Override
-        public void onCameraChange(CameraPosition cameraPosition) {
-          if (isResumed() && keepCurrentLocationVisible && currentLocation != null
-              && !isLocationVisible(currentLocation)) {
-            keepCurrentLocationVisible = false;
-          }
+              @Override
+            public void onCameraChange(CameraPosition cameraPosition) {
+              if (isResumed() && keepCurrentLocationVisible && currentLocation != null
+                  && !isLocationVisible(currentLocation)) {
+                keepCurrentLocationVisible = false;
+              }
+            }
+          });
         }
       });
     }
   }
 
+  @SuppressLint("MissingPermission")
   @Override
   public void onResume() {
     super.onResume();

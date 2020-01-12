@@ -1,12 +1,11 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 17
-    buildToolsVersion "23.0.2"
+    compileSdkVersion 29
 
     defaultConfig {
-        minSdkVersion 9
-        targetSdkVersion 19
+        minSdkVersion 14
+        targetSdkVersion 29
     }
 
     buildTypes {
@@ -18,5 +17,5 @@ android {
 }
 
 dependencies {
-    compile 'com.google.protobuf:protobuf-java:2.5.0'
+    implementation 'com.google.protobuf:protobuf-lite:3.0.1'
 }

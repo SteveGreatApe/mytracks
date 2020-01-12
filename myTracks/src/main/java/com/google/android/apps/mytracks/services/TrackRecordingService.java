@@ -47,11 +47,14 @@ import com.google.android.apps.mytracks.util.TrackIconUtils;
 import com.google.android.apps.mytracks.util.TrackNameUtils;
 import com.google.android.apps.mytracks.util.UnitConversions;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
-import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.ActivityRecognitionClient;
+import com.google.android.gms.location.ActivityTransition;
+import com.google.android.gms.location.ActivityTransitionRequest;
 import com.google.android.gms.location.DetectedActivity;
-import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.maps.mytracks.R;
 import com.google.common.annotations.VisibleForTesting;
 
@@ -71,10 +74,13 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager.WakeLock;
 import android.os.Process;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.TaskStackBuilder;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -238,9 +244,9 @@ public class TrackRecordingService extends Service {
         }
       };
 
-  private LocationListener locationListener = new LocationListener() {
-      @Override
-    public void onLocationChanged(final Location location) {
+  private LocationCallback locationListener = new LocationCallback() {
+    public void onLocationResult(LocationResult result) {
+      final Location location = result.getLastLocation();
       if (myTracksLocationManager == null || executorService == null
           || !myTracksLocationManager.isAllowed() || executorService.isShutdown()
           || executorService.isTerminated()) {
@@ -255,19 +261,22 @@ public class TrackRecordingService extends Service {
     }
   };
 
-  private final ConnectionCallbacks activityRecognitionCallbacks = new ConnectionCallbacks() {
-      @Override
-    public void onDisconnected() {}
+  private final GoogleApiClient.ConnectionCallbacks activityRecognitionCallbacks = new GoogleApiClient.ConnectionCallbacks() {
 
       @Override
     public void onConnected(Bundle bundle) {
       activityRecognitionClient.requestActivityUpdates(
           ONE_MINUTE, activityRecognitionPendingIntent);
     }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
   };
 
-  private final OnConnectionFailedListener
-      activityRecognitionFailedListener = new OnConnectionFailedListener() {
+  private final GoogleApiClient.OnConnectionFailedListener
+      activityRecognitionFailedListener = new GoogleApiClient.OnConnectionFailedListener() {
 
           @Override
         public void onConnectionFailed(ConnectionResult connectionResult) {}
@@ -301,9 +310,14 @@ public class TrackRecordingService extends Service {
     activityRecognitionPendingIntent = PendingIntent.getService(context, 0,
         new Intent(context, ActivityRecognitionIntentService.class),
         PendingIntent.FLAG_UPDATE_CURRENT);
-    activityRecognitionClient = new ActivityRecognitionClient(
-        context, activityRecognitionCallbacks, activityRecognitionFailedListener);
-    activityRecognitionClient.connect();    
+
+    activityRecognitionClient = ActivityRecognition.getClient(context);
+    List<ActivityTransition> transitions = new ArrayList<ActivityTransition>();
+    addTransition(transitions, DetectedActivity.STILL);
+    addTransition(transitions, DetectedActivity.ON_FOOT);
+    ActivityTransitionRequest request = new ActivityTransitionRequest(transitions);
+    activityRecognitionClient.requestActivityTransitionUpdates(request,  activityRecognitionPendingIntent);
+    // TODO: activityRecognitionCallbacks, activityRecognitionFailedListener);
     voiceExecutor = new PeriodicTaskExecutor(this, new AnnouncementPeriodicTaskFactory());
     splitExecutor = new PeriodicTaskExecutor(this, new SplitPeriodicTaskFactory());
     sharedPreferences = getSharedPreferences(Constants.SETTINGS_NAME, Context.MODE_PRIVATE);
@@ -331,6 +345,17 @@ public class TrackRecordingService extends Service {
       }
       showNotification(false);
     }
+  }
+
+  private void addTransition(List<ActivityTransition> transitions, int activityType) {
+    transitions.add(new ActivityTransition.Builder()
+            .setActivityType(activityType)
+            .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_ENTER)
+            .build());
+    transitions.add(new ActivityTransition.Builder()
+            .setActivityType(activityType)
+            .setActivityTransition(ActivityTransition.ACTIVITY_TRANSITION_EXIT)
+            .build());
   }
 
   /*
@@ -391,10 +416,8 @@ public class TrackRecordingService extends Service {
       voiceExecutor = null;
     }
 
-    if (activityRecognitionClient.isConnected()) {
-      activityRecognitionClient.removeActivityUpdates(activityRecognitionPendingIntent);
-    }
-    activityRecognitionClient.disconnect();
+    activityRecognitionClient.removeActivityUpdates(activityRecognitionPendingIntent);
+//    activityRecognitionClient.disconnect();
     activityRecognitionPendingIntent.cancel();
     
     myTracksLocationManager.close();
@@ -1311,7 +1334,8 @@ public class TrackRecordingService extends Service {
       if (!canAccess()) {
         return;
       }
-      trackRecordingService.locationListener.onLocationChanged(location);
+      LocationResult result = LocationResult.create(Collections.singletonList(location));
+      trackRecordingService.locationListener.onLocationResult(result);
     }
 
     @Override

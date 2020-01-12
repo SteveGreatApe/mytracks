@@ -16,21 +16,27 @@
 
 package com.google.android.apps.mytracks.services;
 
-import com.google.android.apps.mytracks.util.GoogleLocationUtils;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
-import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
-import com.google.android.gms.location.LocationClient;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-
+import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
+import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+
+import com.google.android.apps.mytracks.util.GoogleLocationUtils;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 /**
  * My Tracks Location Manager. Applies Google location settings before allowing
@@ -58,28 +64,39 @@ public class MyTracksLocationManager {
   }
 
   private final ConnectionCallbacks connectionCallbacks = new ConnectionCallbacks() {
-      @Override
-    public void onDisconnected() {}
 
       @Override
-    public void onConnected(Bundle bunlde) {
+    public void onConnected(Bundle bundle) {
       handler.post(new Runnable() {
+          @SuppressLint("MissingPermission")
           @Override
         public void run() {
-          if (requestLastLocation != null && locationClient.isConnected()) {
-            requestLastLocation.onLocationChanged(locationClient.getLastLocation());
+          if (fusedLocationClient != null && requestLastLocation != null) {
+            final LocationListener callbackRequestLastLocation = requestLastLocation;
             requestLastLocation = null;
+            fusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(new OnSuccessListener<Location>() {
+                      @Override
+                      public void onSuccess(Location location) {
+                        callbackRequestLastLocation.onLocationChanged(location);
+                      }
+                    });
           }
-          if (requestLocationUpdates != null && locationClient.isConnected()) {
-            LocationRequest locationRequest = new LocationRequest().setPriority(
+          if (requestLocationUpdates != null) {
+            LocationRequest locationRequest = LocationRequest.create();
+            locationRequest.setPriority(
                 LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(requestLocationUpdatesTime)
                 .setFastestInterval(requestLocationUpdatesTime)
                 .setSmallestDisplacement(requestLocationUpdatesDistance);
-            locationClient.requestLocationUpdates(
-                locationRequest, requestLocationUpdates, handler.getLooper());
+            fusedLocationClient.requestLocationUpdates(locationRequest, requestLocationUpdates, null);
           }
         }
       });
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+      // TODO
     }
   };
 
@@ -91,14 +108,14 @@ public class MyTracksLocationManager {
 
   private final Context context;
   private final Handler handler;
-  private final LocationClient locationClient;
   private final LocationManager locationManager;
   private final ContentResolver contentResolver;
   private final GoogleSettingsObserver observer;
+  private final FusedLocationProviderClient fusedLocationClient;
 
   private boolean isAllowed;
   private LocationListener requestLastLocation;
-  private LocationListener requestLocationUpdates;
+  private LocationCallback requestLocationUpdates;
   private float requestLocationUpdatesDistance;
   private long requestLocationUpdatesTime;
 
@@ -107,10 +124,10 @@ public class MyTracksLocationManager {
     this.handler = new Handler(looper);
 
     if (enableLocaitonClient) {
-      locationClient = new LocationClient(context, connectionCallbacks, onConnectionFailedListener);
-      locationClient.connect();
+      GoogleApiClient.Builder builder = new GoogleApiClient.Builder(context, connectionCallbacks, onConnectionFailedListener);
+      fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
     } else {
-      locationClient = null;
+      fusedLocationClient = null;
     }
 
     locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
@@ -127,8 +144,8 @@ public class MyTracksLocationManager {
    * Closes the {@link MyTracksLocationManager}.
    */
   public void close() {
-    if (locationClient != null) {
-      locationClient.disconnect();
+    if (fusedLocationClient != null) {
+//      fusedLocationClient.disconnect(); TODO: Any equivalent required?
     }
     contentResolver.unregisterContentObserver(observer);
   }
@@ -185,7 +202,7 @@ public class MyTracksLocationManager {
    * @param locationListener the location listener
    */
   public void requestLocationUpdates(
-      final long minTime, final float minDistance, final LocationListener locationListener) {
+      final long minTime, final float minDistance, final LocationCallback locationListener) {
     handler.post(new Runnable() {
         @Override
       public void run() {
@@ -202,13 +219,13 @@ public class MyTracksLocationManager {
    * 
    * @param locationListener the location listener
    */
-  public void removeLocationUpdates(final LocationListener locationListener) {
+  public void removeLocationUpdates(final LocationCallback locationListener) {
     handler.post(new Runnable() {
         @Override
       public void run() {
         requestLocationUpdates = null;
-        if (locationClient != null && locationClient.isConnected()) {
-          locationClient.removeLocationUpdates(locationListener);
+        if (fusedLocationClient != null) {
+          fusedLocationClient.removeLocationUpdates(locationListener);
         }
       }
     });

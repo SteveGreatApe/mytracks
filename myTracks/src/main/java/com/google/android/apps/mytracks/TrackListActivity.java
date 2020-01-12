@@ -53,6 +53,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.maps.mytracks.BuildConfig;
 import com.google.android.maps.mytracks.R;
 
+import android.Manifest;
 import android.accounts.Account;
 import android.app.Dialog;
 import android.app.SearchManager;
@@ -61,15 +62,21 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.Parcelable;
 import android.os.RemoteException;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
+import androidx.core.content.ContextCompat;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.CursorLoader;
+import androidx.loader.content.Loader;
+
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -273,7 +280,7 @@ public class TrackListActivity extends AbstractSendToGoogleActivity
     }
   };
 
-  private final LoaderCallbacks<Cursor> loaderCallbacks = new LoaderCallbacks<Cursor>() {
+  private final LoaderManager.LoaderCallbacks<Cursor> loaderCallbacks = new LoaderManager.LoaderCallbacks<Cursor>() {
       @Override
     public Loader<Cursor> onCreateLoader(int arg0, Bundle arg1) {
       return new CursorLoader(TrackListActivity.this, TracksColumns.CONTENT_URI, PROJECTION, null,
@@ -393,6 +400,8 @@ public class TrackListActivity extends AbstractSendToGoogleActivity
 
     getSupportLoaderManager().initLoader(0, null, loaderCallbacks);
     showStartupDialogs();
+
+    checkPermissions();
   }
 
   @Override
@@ -809,6 +818,70 @@ public class TrackListActivity extends AbstractSendToGoogleActivity
       String googleAccount = PreferencesUtils.getString(
           this, R.string.google_account_key, PreferencesUtils.GOOGLE_ACCOUNT_DEFAULT);
       enableSync(new Account(googleAccount, Constants.ACCOUNT_TYPE));
+    }
+  }
+
+  // TODO: ZZZ Work in progress permission code
+  final int REQUEST_CODE_PERMISSIONS = 10;
+  final String[] REQUIRED_PERMISSIONS = {
+//          Manifest.permission.CAMERA,
+          Manifest.permission.RECEIVE_BOOT_COMPLETED,
+          Manifest.permission.ACCESS_COARSE_LOCATION,
+          Manifest.permission.ACCESS_FINE_LOCATION,
+          Manifest.permission.ACCESS_NETWORK_STATE,
+          Manifest.permission.WAKE_LOCK,
+          Manifest.permission.BLUETOOTH,
+          Manifest.permission.BLUETOOTH_ADMIN,
+          Manifest.permission.GET_ACCOUNTS,
+          Manifest.permission.INTERNET,
+          Manifest.permission.GET_ACCOUNTS,
+          Manifest.permission.READ_SYNC_STATS,
+          Manifest.permission.READ_SYNC_SETTINGS,
+          Manifest.permission.WRITE_SYNC_SETTINGS,
+          Manifest.permission.READ_PHONE_STATE,
+          Manifest.permission.READ_EXTERNAL_STORAGE,
+          Manifest.permission.WRITE_EXTERNAL_STORAGE,
+          Manifest.permission.READ_CONTACTS
+  };
+//            <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH
+//            <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH.local
+//            <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION
+//            <uses-permission android:name="com.dsi.ant.permission.ANT
+//            <uses-permission android:name="com.dsi.ant.permission.ANT_ADMIN
+//  <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES
+
+  private void checkPermissions() {
+    if (allPermissionsGranted()) {
+      permissionsReady();
+    } else {
+      ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
+    }
+  }
+
+  private void permissionsReady() {
+
+  }
+
+  private boolean allPermissionsGranted() {
+    for(String permission : REQUIRED_PERMISSIONS) {
+      if (ContextCompat.checkSelfPermission(getBaseContext(), permission) != PackageManager.PERMISSION_GRANTED) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+
+  @Override
+  public void onRequestPermissionsResult(int requestCode,
+                                         @NonNull String[] permissions,
+                                         @NonNull int[] grantResults) {
+    if (requestCode == REQUEST_CODE_PERMISSIONS) {
+      if (allPermissionsGranted()) {
+        permissionsReady();
+      } else {
+        Toast.makeText(this, R.string.permissions_not_granted, Toast.LENGTH_SHORT).show();
+      }
     }
   }
 }

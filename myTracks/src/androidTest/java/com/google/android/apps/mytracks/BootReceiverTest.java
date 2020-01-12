@@ -15,40 +15,49 @@
  */
 package com.google.android.apps.mytracks;
 
-import com.google.android.apps.mytracks.services.TrackRecordingService;
-
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.test.AndroidTestCase;
+
+import androidx.test.core.app.ApplicationProvider;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+import com.google.android.apps.mytracks.services.TrackRecordingService;
+
+import org.junit.runner.RunWith;
 
 import java.util.List;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for the BootReceiver.
  * 
  * @author Youtao Liu
  */
-public class BootReceiverTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class BootReceiverTest {
   private static final String SERVICE_NAME = "com.google.android.apps.mytracks.services.TrackRecordingService";
 
+  private Context context = ApplicationProvider.getApplicationContext();
   /**
    * Tests the behavior when receive notification which is the phone boot.
    */
   public void testOnReceive_startService() {
     // Make sure no TrackRecordingService
-    Intent stopIntent = new Intent(getContext(), TrackRecordingService.class);
-    getContext().stopService(stopIntent);
-    assertFalse(isServiceExisted(getContext(), SERVICE_NAME));
+    Intent stopIntent = new Intent(context, TrackRecordingService.class);
+    context.stopService(stopIntent);
+    assertFalse(isServiceExisted(context, SERVICE_NAME));
 
     BootReceiver bootReceiver = new BootReceiver();
     Intent intent = new Intent();
     intent.setAction(Intent.ACTION_BOOT_COMPLETED);
-    bootReceiver.onReceive(getContext(), intent);
+    bootReceiver.onReceive(context, intent);
     // Check if the service is started
-    assertTrue(isServiceExisted(getContext(), SERVICE_NAME));
+    assertTrue(isServiceExisted(context, SERVICE_NAME));
   }
 
   /**
@@ -56,16 +65,16 @@ public class BootReceiverTest extends AndroidTestCase {
    */
   public void testOnReceive_noStartService() {
     // Make sure no TrackRecordingService
-    Intent stopIntent = new Intent(getContext(), TrackRecordingService.class);
-    getContext().stopService(stopIntent);
-    assertFalse(isServiceExisted(getContext(), SERVICE_NAME));
+    Intent stopIntent = new Intent(context, TrackRecordingService.class);
+    context.stopService(stopIntent);
+    assertFalse(isServiceExisted(context, SERVICE_NAME));
 
     BootReceiver bootReceiver = new BootReceiver();
     Intent intent = new Intent();
     intent.setAction(Intent.ACTION_BUG_REPORT);
-    bootReceiver.onReceive(getContext(), intent);
+    bootReceiver.onReceive(context, intent);
     // Check if the service is not started
-    assertFalse(isServiceExisted(getContext(), SERVICE_NAME));
+    assertFalse(isServiceExisted(context, SERVICE_NAME));
   }
 
   /**

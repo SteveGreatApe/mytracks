@@ -1,4 +1,17 @@
 # MyTracks
+An updated version of MyTracks based on plonk42's Jan 2016 release.
+
+Updated to replace built in .jar files with latest releases.
+Disabled Analytics
+
+## Known Issue
+Activity type recognition not currently working.
+Still building against bundled old jars for antlib.jar & google-common.jar
+TODO:
+Unit tests not ported over to new libraries yet.
+
+README.md below from plonk42
+-------
 *A respawn of Google MyTracks*
 
 **MyTracks** is a GPS tracking application, that was [open-sourced by Google](http://google-latlong.blogspot.fr/2010/05/code-for-my-tracks-is-now-yours.html) on May 28, 2010. It is licensed under the terms of [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0). 

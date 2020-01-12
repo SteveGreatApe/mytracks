@@ -34,10 +34,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
-import android.support.v4.widget.ResourceCursorAdapter;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -49,6 +45,11 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+
+import androidx.cursoradapter.widget.ResourceCursorAdapter;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.CursorLoader;
+import androidx.loader.content.Loader;
 
 /**
  * Activity to show a list of markers in a track.
@@ -198,7 +199,7 @@ public class MarkerListActivity extends AbstractMyTracksActivity implements Dele
         .configureListViewContextualMenu(this, listView, contextualActionModeCallback);
 
     final long firstWaypointId = myTracksProviderUtils.getFirstWaypointId(trackId);
-    getSupportLoaderManager().initLoader(0, null, new LoaderCallbacks<Cursor>() {
+    getSupportLoaderManager().initLoader(0, null, new LoaderManager.LoaderCallbacks<Cursor>() {
         @Override
       public Loader<Cursor> onCreateLoader(int arg0, Bundle arg1) {
         return new CursorLoader(MarkerListActivity.this, WaypointsColumns.CONTENT_URI, PROJECTION,

@@ -19,10 +19,10 @@ import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.maps.mytracks.R;
 import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.googleapis.GoogleUrl;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 import com.google.api.client.http.ByteArrayContent;
+import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
@@ -383,7 +383,7 @@ public class SendFusionTablesAsyncTask extends AbstractSendAsyncTask {
         SendFusionTablesUtils.getKmlLineString(track.getLocations()));
     String sql = "INSERT INTO " + tableId + " (name,description,geometry) VALUES " + values;
     HttpContent content = ByteArrayContent.fromString(null, "sql=" + sql);
-    GoogleUrl url = new GoogleUrl("https://www.googleapis.com/fusiontables/v1/query");
+    GenericUrl url = new GenericUrl("https://www.googleapis.com/fusiontables/v1/query");
     fusiontables.getRequestFactory().buildPostRequest(url, content).execute();
   }
 

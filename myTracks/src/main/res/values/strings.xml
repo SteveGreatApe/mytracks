@@ -3037,4 +3037,5 @@ limitations under the License.
       completion suggestion for a waypoint.">
     waypoint
   </string>
+  <string name="permissions_not_granted">Permissions Not Granted</string>
 </resources>

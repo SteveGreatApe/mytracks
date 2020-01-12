@@ -16,21 +16,27 @@
 
 package com.google.android.apps.mytracks.endtoendtest.common;
 
+import android.app.Instrumentation;
+import android.view.View;
+
+import androidx.test.rule.ActivityTestRule;
+
 import com.google.android.apps.mytracks.TrackListActivity;
 import com.google.android.apps.mytracks.endtoendtest.EndToEndTestUtils;
 import com.google.android.apps.mytracks.util.GoogleLocationUtils;
 import com.google.android.maps.mytracks.R;
 
-import android.app.Instrumentation;
-import android.test.ActivityInstrumentationTestCase2;
-import android.view.View;
+import org.junit.After;
+import org.junit.Before;
+
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 /**
  * Tests the my location button.
  * 
  * @author Youtao Liu
  */
-public class MyLocationTest extends ActivityInstrumentationTestCase2<TrackListActivity> {
+public class MyLocationTest extends ActivityTestRule<TrackListActivity> {
 
   private Instrumentation instrumentation;
   private TrackListActivity trackListActivity;
@@ -39,18 +45,16 @@ public class MyLocationTest extends ActivityInstrumentationTestCase2<TrackListAc
     super(TrackListActivity.class);
   }
 
-  @Override
-  protected void setUp() throws Exception {
-    super.setUp();
+  @Before
+  public void setUp() throws Exception {
     instrumentation = getInstrumentation();
     trackListActivity = getActivity();
     EndToEndTestUtils.setupForAllTest(instrumentation, trackListActivity);
   }
 
-  @Override
-  protected void tearDown() throws Exception {
+  @After
+  public void tearDown() throws Exception {
     EndToEndTestUtils.SOLO.finishOpenedActivities();
-    super.tearDown();
   }
 
   /**

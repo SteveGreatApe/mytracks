@@ -29,12 +29,13 @@ import android.content.DialogInterface;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.TextView;
+
+import androidx.fragment.app.DialogFragment;
 
 import java.util.ArrayList;
 import java.util.List;

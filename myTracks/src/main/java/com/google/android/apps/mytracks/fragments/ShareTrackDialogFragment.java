@@ -31,8 +31,9 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.widget.SimpleCursorAdapter;
+
+import androidx.cursoradapter.widget.SimpleCursorAdapter;
+import androidx.fragment.app.FragmentActivity;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
